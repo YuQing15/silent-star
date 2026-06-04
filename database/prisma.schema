@@ -1,0 +1,496 @@
+// ============================================================
+// Luminary — Prisma Schema
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- ENUMS ----
+
+enum UserRole {
+  reader
+  translator
+  moderator
+  admin
+}
+
+enum NovelStatus {
+  ongoing
+  completed
+  hiatus
+  dropped
+}
+
+enum NovelOrigin {
+  chinese
+  korean
+  japanese
+}
+
+enum ChapterStatus {
+  draft
+  scheduled
+  published
+  locked
+}
+
+enum MembershipTier {
+  free
+  supporter
+  premium
+  elite
+}
+
+enum NotificationType {
+  new_chapter
+  comment_reply
+  system
+  achievement
+  streak
+}
+
+enum MoodTag {
+  action
+  romance
+  mystery
+  comedy
+  tragedy
+  heartwarming
+  thrilling
+  melancholic
+  epic
+  cozy
+}
+
+enum ReadingTheme {
+  default
+  sepia
+  night
+  forest
+  ocean
+  paper
+}
+
+// ---- MODELS ----
+
+model User {
+  id                    String         @id @default(uuid())
+  supabaseId            String         @unique @map("supabase_id")
+  username              String         @unique @db.VarChar(40)
+  displayName           String?        @db.VarChar(80) @map("display_name")
+  email                 String         @unique
+  avatarUrl             String?        @map("avatar_url")
+  bio                   String?
+  role                  UserRole       @default(reader)
+  membershipTier        MembershipTier @default(free) @map("membership_tier")
+  membershipExpiresAt   DateTime?      @map("membership_expires_at")
+  readingStreak         Int            @default(0) @map("reading_streak")
+  streakLastDate        DateTime?      @map("streak_last_date") @db.Date
+  longestStreak         Int            @default(0) @map("longest_streak")
+  totalChaptersRead     Int            @default(0) @map("total_chapters_read")
+  totalReadingMinutes   Int            @default(0) @map("total_reading_minutes")
+  xpPoints              Int            @default(0) @map("xp_points")
+  level                 Int            @default(1)
+  preferredTheme        ReadingTheme   @default(default) @map("preferred_theme")
+  preferredFontSize     Int            @default(18) @map("preferred_font_size")
+  preferredLineHeight   Decimal        @default(1.8) @map("preferred_line_height") @db.Decimal(3, 1)
+  emailNotifications    Boolean        @default(true) @map("email_notifications")
+  isBanned              Boolean        @default(false) @map("is_banned")
+  lastSeenAt            DateTime?      @map("last_seen_at")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  translatedNovels      Novel[]
+  readingHistory        ReadingHistory[]
+  readingProgress       ReadingProgress[]
+  readingSessions       ReadingSession[]
+  bookmarks             Bookmark[]
+  chapterBookmarks      ChapterBookmark[]
+  ratings               Rating[]
+  chapterReactions      ChapterReaction[]
+  comments              Comment[]
+  commentLikes          CommentLike[]
+  notifications         Notification[]
+  membershipTransactions MembershipTransaction[]
+  coinBalance           CoinBalance?
+  coinTransactions      CoinTransaction[]
+  glossaries            Glossary[]
+  recommendationSignals RecommendationSignal[]
+  achievements          UserAchievement[]
+
+  @@map("users")
+}
+
+model Novel {
+  id                 String      @id @default(uuid())
+  slug               String      @unique
+  title              String
+  originalTitle      String?     @map("original_title")
+  synopsis           String
+  coverUrl           String?     @map("cover_url")
+  bannerUrl          String?     @map("banner_url")
+  authorName         String      @map("author_name")
+  translatorId       String?     @map("translator_id")
+  translator         User?       @relation(fields: [translatorId], references: [id])
+  status             NovelStatus @default(ongoing)
+  origin             NovelOrigin
+  totalChapters      Int         @default(0) @map("total_chapters")
+  publishedChapters  Int         @default(0) @map("published_chapters")
+  averageRating      Decimal     @default(0) @map("average_rating") @db.Decimal(3, 2)
+  totalRatings       Int         @default(0) @map("total_ratings")
+  totalViews         BigInt      @default(0) @map("total_views")
+  weeklyViews        Int         @default(0) @map("weekly_views")
+  monthlyViews       Int         @default(0) @map("monthly_views")
+  totalBookmarks     Int         @default(0) @map("total_bookmarks")
+  wordCountAvg       Int         @default(2000) @map("word_count_avg")
+  ambientTheme       String      @default("default") @map("ambient_theme")
+  primaryMood        MoodTag?    @map("primary_mood")
+  contentWarning     String?     @map("content_warning")
+  isPremium          Boolean     @default(false) @map("is_premium")
+  isFeatured         Boolean     @default(false) @map("is_featured")
+  isTrending         Boolean     @default(false) @map("is_trending")
+  publishedAt        DateTime?   @map("published_at")
+  lastChapterAt      DateTime?   @map("last_chapter_at")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  chapters           Chapter[]
+  tags               NovelTag[]
+  readingHistory     ReadingHistory[]
+  readingProgress    ReadingProgress[]
+  readingSessions    ReadingSession[]
+  bookmarks          Bookmark[]
+  ratings            Rating[]
+  comments           Comment[]
+  glossaries         Glossary[]
+  recommendationSignals RecommendationSignal[]
+  similarityA        NovelSimilarity[] @relation("NovelA")
+  similarityB        NovelSimilarity[] @relation("NovelB")
+
+  @@map("novels")
+}
+
+model Tag {
+  id         String     @id @default(uuid())
+  name       String     @unique @db.VarChar(50)
+  slug       String     @unique @db.VarChar(50)
+  color      String?    @db.VarChar(7)
+  isGenre    Boolean    @default(false) @map("is_genre")
+  usageCount Int        @default(0) @map("usage_count")
+  novels     NovelTag[]
+
+  @@map("tags")
+}
+
+model NovelTag {
+  novelId String @map("novel_id")
+  tagId   String @map("tag_id")
+  novel   Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([novelId, tagId])
+  @@map("novel_tags")
+}
+
+model Chapter {
+  id                    String        @id @default(uuid())
+  novelId               String        @map("novel_id")
+  novel                 Novel         @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapterNumber         Int           @map("chapter_number")
+  volumeNumber          Int?          @map("volume_number")
+  title                 String
+  slug                  String
+  content               String?
+  rawContent            String?       @map("raw_content")
+  wordCount             Int           @default(0) @map("word_count")
+  status                ChapterStatus @default(draft)
+  isPremium             Boolean       @default(false) @map("is_premium")
+  unlockCost            Int           @default(0) @map("unlock_cost")
+  translatorNote        String?       @map("translator_note")
+  scheduledAt           DateTime?     @map("scheduled_at")
+  publishedAt           DateTime?     @map("published_at")
+  totalViews            Int           @default(0) @map("total_views")
+  totalComments         Int           @default(0) @map("total_comments")
+  estimatedReadMinutes  Int           @default(5) @map("estimated_read_minutes")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  readingHistory    ReadingHistory[]
+  readingProgress   ReadingProgress[]
+  chapterBookmarks  ChapterBookmark[]
+  reactions         ChapterReaction[]
+  comments          Comment[]
+  coinTransactions  CoinTransaction[]
+  translationJobs   TranslationJob[]
+
+  @@unique([novelId, chapterNumber])
+  @@map("chapters")
+}
+
+model ReadingHistory {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  novelId        String   @map("novel_id")
+  chapterId      String   @map("chapter_id")
+  scrollPosition Decimal  @default(0) @map("scroll_position") @db.Decimal(5, 2)
+  completed      Boolean  @default(false)
+  readAt         DateTime @default(now()) @map("read_at")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel          Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter        Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@map("reading_history")
+}
+
+model ReadingProgress {
+  userId         String   @map("user_id")
+  novelId        String   @map("novel_id")
+  chapterId      String   @map("chapter_id")
+  scrollPosition Decimal  @default(0) @map("scroll_position") @db.Decimal(5, 2)
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel          Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter        Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
+  @@map("reading_progress")
+}
+
+model ReadingSession {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  novelId         String?  @map("novel_id")
+  startedAt       DateTime @default(now()) @map("started_at")
+  endedAt         DateTime? @map("ended_at")
+  durationMinutes Int      @default(0) @map("duration_minutes")
+  chaptersRead    Int      @default(0) @map("chapters_read")
+  wordsRead       Int      @default(0) @map("words_read")
+  sessionDate     DateTime @default(now()) @map("session_date") @db.Date
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel           Novel?   @relation(fields: [novelId], references: [id], onDelete: SetNull)
+
+  @@map("reading_sessions")
+}
+
+model Bookmark {
+  userId    String   @map("user_id")
+  novelId   String   @map("novel_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
+  @@map("bookmarks")
+}
+
+model ChapterBookmark {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  chapterId String   @map("chapter_id")
+  note      String?
+  position  Decimal? @db.Decimal(5, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("chapter_bookmarks")
+}
+
+model Rating {
+  userId       String   @map("user_id")
+  novelId      String   @map("novel_id")
+  score        Int
+  review       String?
+  isSpoiler    Boolean  @default(false) @map("is_spoiler")
+  helpfulCount Int      @default(0) @map("helpful_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel        Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
+  @@map("ratings")
+}
+
+model ChapterReaction {
+  userId    String  @map("user_id")
+  chapterId String  @map("chapter_id")
+  mood      MoodTag
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@id([userId, chapterId])
+  @@map("chapter_reactions")
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  chapterId  String?   @map("chapter_id")
+  novelId    String?   @map("novel_id")
+  parentId   String?   @map("parent_id")
+  content    String
+  isSpoiler  Boolean   @default(false) @map("is_spoiler")
+  likeCount  Int       @default(0) @map("like_count")
+  replyCount Int       @default(0) @map("reply_count")
+  isDeleted  Boolean   @default(false) @map("is_deleted")
+  isPinned   Boolean   @default(false) @map("is_pinned")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter    Chapter?  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  novel      Novel?    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  parent     Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[] @relation("Replies")
+  likes      CommentLike[]
+
+  @@map("comments")
+}
+
+model CommentLike {
+  userId    String  @map("user_id")
+  commentId String  @map("comment_id")
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+  @@map("comment_likes")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model MembershipTransaction {
+  id         String         @id @default(uuid())
+  userId     String         @map("user_id")
+  tier       MembershipTier
+  amountUsd  Decimal        @map("amount_usd") @db.Decimal(8, 2)
+  stripeId   String?        @map("stripe_id")
+  startsAt   DateTime       @map("starts_at")
+  endsAt     DateTime       @map("ends_at")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("membership_transactions")
+}
+
+model CoinBalance {
+  userId    String   @id @map("user_id")
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("coin_balance")
+}
+
+model CoinTransaction {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  amount      Int
+  description String
+  chapterId   String?  @map("chapter_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@map("coin_transactions")
+}
+
+model Glossary {
+  id          String   @id @default(uuid())
+  novelId     String   @map("novel_id")
+  original    String
+  translation String
+  context     String?
+  category    String?  @db.VarChar(50)
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  novel       Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  creator     User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@map("glossaries")
+}
+
+model TranslationJob {
+  id           String   @id @default(uuid())
+  chapterId    String   @map("chapter_id")
+  rawText      String   @map("raw_text")
+  status       String   @default("pending")
+  modelUsed    String?  @map("model_used")
+  tokensUsed   Int?     @map("tokens_used")
+  completedAt  DateTime? @map("completed_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  chapter      Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("translation_jobs")
+}
+
+model RecommendationSignal {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  novelId     String   @map("novel_id")
+  signalType  String   @map("signal_type")
+  weight      Decimal  @default(1.0) @db.Decimal(4, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel       Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@map("recommendation_signals")
+}
+
+model NovelSimilarity {
+  novelAId  String   @map("novel_a")
+  novelBId  String   @map("novel_b")
+  score     Decimal  @db.Decimal(4, 3)
+  updatedAt DateTime @updatedAt @map("updated_at")
+  novelA    Novel    @relation("NovelA", fields: [novelAId], references: [id], onDelete: Cascade)
+  novelB    Novel    @relation("NovelB", fields: [novelBId], references: [id], onDelete: Cascade)
+
+  @@id([novelAId, novelBId])
+  @@map("novel_similarity")
+}
+
+model Achievement {
+  id          String           @id @default(uuid())
+  slug        String           @unique @db.VarChar(60)
+  name        String           @db.VarChar(100)
+  description String
+  icon        String?
+  xpReward    Int              @default(0) @map("xp_reward")
+  rarity      String           @default("common")
+  users       UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        String      @map("user_id")
+  achievementId String      @map("achievement_id")
+  earnedAt      DateTime    @default(now()) @map("earned_at")
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}

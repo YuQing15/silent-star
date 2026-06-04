@@ -1,0 +1,9 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Silent Star logo</title>
+  <desc id="desc">A minimalist crescent moon with a subtle four-point star.</desc>
+  <rect width="256" height="256" rx="56" fill="#313c45"/>
+  <circle cx="116" cy="120" r="62" fill="#d5dbe2"/>
+  <circle cx="143" cy="105" r="62" fill="#313c45"/>
+  <path d="M171 58L179.6 91.4L213 100L179.6 108.6L171 142L162.4 108.6L129 100L162.4 91.4L171 58Z" fill="#778ca4"/>
+  <path d="M80 166L84.8 184.2L103 189L84.8 193.8L80 212L75.2 193.8L57 189L75.2 184.2L80 166Z" fill="#4f6271"/>
+</svg>
