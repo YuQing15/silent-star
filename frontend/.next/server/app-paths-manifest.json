@@ -1,0 +1,17 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin-login/page": "app/admin-login/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/forgot-password/page": "app/forgot-password/page.js",
+  "/library/page": "app/library/page.js",
+  "/login/page": "app/login/page.js",
+  "/novels/[slug]/chapters/[chapterId]/page": "app/novels/[slug]/chapters/[chapterId]/page.js",
+  "/novels/[slug]/page": "app/novels/[slug]/page.js",
+  "/novels/page": "app/novels/page.js",
+  "/page": "app/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/reset-password/page": "app/reset-password/page.js",
+  "/search/page": "app/search/page.js",
+  "/signup/page": "app/signup/page.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/novels/[slug]/chapters/[chapterId]/page": "app/novels/[slug]/chapters/[chapterId]/page.js"
+}
