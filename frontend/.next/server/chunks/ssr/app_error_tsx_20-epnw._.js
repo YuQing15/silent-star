@@ -1,3 +1,0 @@
-module.exports=[78141,a=>{"use strict";var b=a.i(87924);a.s(["default",0,function({reset:a}){return(0,b.jsx)("div",{className:"min-h-screen flex items-center justify-center px-4",children:(0,b.jsxs)("div",{className:"text-center",children:[(0,b.jsx)("p",{className:"text-5xl mb-4",children:"⚠️"}),(0,b.jsx)("h2",{className:"font-display text-2xl font-semibold mb-2",style:{color:"var(--text-primary)"},children:"Something went wrong"}),(0,b.jsx)("p",{className:"text-sm mb-6",style:{color:"var(--text-muted)"},children:"An unexpected error occurred."}),(0,b.jsx)("button",{onClick:a,className:"btn-primary",children:"Try Again"})]})})}])}];
-
-//# sourceMappingURL=app_error_tsx_20-epnw._.js.map
