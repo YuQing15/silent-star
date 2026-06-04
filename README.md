@@ -1,286 +1,265 @@
-# Luminary — Premium Web Novel Translation Platform
+# Silent Star
 
-A cinematic, binge-worthy web novel reading platform for translated Chinese & Korean fiction. Built with Next.js 15, TypeScript, and Tailwind CSS.
+A web novel reading platform focused on translated Chinese and Korean fiction.
 
----
+Silent Star focuses on a clean and comfortable reading experience, allowing readers to browse novels, track reading progress, bookmark chapters, and continue reading across devices.
 
-## Quick Start (3 commands)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Open **http://localhost:3000**
+Built with Next.js, TypeScript, Tailwind CSS, and Supabase.
 
 ---
 
-## Prerequisites
+## Live Demo
 
-| Tool | Version |
-|------|---------|
-| Node.js | 18.17+ |
-| npm | 9+ |
+https://silent-star-zeta.vercel.app
 
-Check yours: `node -v && npm -v`
+## Features
 
----
+### Reading Experience
 
-## Full Setup
+- Custom chapter reader
+- Adjustable font size
+- Adjustable line height
+- Mobile and desktop reading layouts
+- Adjustable reading width for desktop readers
+- Multiple reading themes:
+  - Light
+  - Sepia
+  - Dark
+  - Snow
+  - Starry
+- Reading progress tracking
+- Automatic chapter completion tracking
+- Continue Reading support
 
-### 1. Clone or download
+### Novel Management
 
-**GitHub:**
-```bash
-git clone https://github.com/yourname/luminary.git
-cd luminary
-```
+- Browse published novels
+- Novel detail pages
+- Chapter navigation
+- Reading status management:
+  - Currently Reading
+  - Want to Read
+  - Completed
+  - Dropped
+- Bookmarks and reading history
 
-**Download ZIP:**  
-Click the download button above the chat → extract to any folder → `cd luminary`
+### Admin Tools
 
-### 2. Environment variables
-
-```bash
-cp .env.example frontend/.env.local
-```
-
-The frontend runs fully on mock data — no real env vars needed for local dev.
-
-### 3. Install & run
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Visit **http://localhost:3000**
-
----
-
-## Pages & Routes
-
-| Route | Description |
-|-------|-------------|
-| `/` | Homepage — hero, trending, genres, continue reading |
-| `/novels` | Browse all novels with filters + sort |
-| `/novels/[slug]` | Novel detail — cover, synopsis, chapters list, ratings |
-| `/novels/[slug]/chapters/[id]` | **Immersive chapter reader** |
-| `/search` | Full-text search with live results |
-| `/library` | Reading progress, bookmarks, streak tracker |
-| `/profile` | User profile, achievements, stats |
-| `/not-found` | 404 page |
-
----
-
-## Reader Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `→` / `↓` | Next chapter |
-| `←` / `↑` | Previous chapter |
-| `S` | Toggle settings panel |
-| `T` | Toggle table of contents |
-| `Esc` | Close panels |
-
----
-
-## Project Structure
-
-```
-luminary/
-├── frontend/                    # Next.js 15 App
-│   ├── app/                     # App Router pages
-│   │   ├── layout.tsx           # Root layout (fonts, theme, nav)
-│   │   ├── page.tsx             # Homepage
-│   │   ├── not-found.tsx        # 404 page
-│   │   ├── error.tsx            # Error boundary
-│   │   ├── novels/
-│   │   │   ├── page.tsx         # Browse novels
-│   │   │   └── [slug]/
-│   │   │       ├── page.tsx     # Novel detail
-│   │   │       └── chapters/
-│   │   │           └── [chapterId]/
-│   │   │               └── page.tsx  # Chapter reader
-│   │   ├── search/page.tsx      # Search
-│   │   ├── library/page.tsx     # Library
-│   │   └── profile/page.tsx     # Profile
-│   │
-│   ├── components/
-│   │   ├── home/
-│   │   │   ├── HeroSection.tsx  # Cinematic hero carousel
-│   │   │   └── HomeSections.tsx # Trending, genres, continue reading
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx       # Top nav + search modal
-│   │   │   ├── MobileBottomNav.tsx  # Mobile bottom tabs
-│   │   │   └── ThemeProvider.tsx    # Dark/light mode context
-│   │   ├── novel/
-│   │   │   ├── NovelCard.tsx    # Card (default/horizontal/compact)
-│   │   │   ├── NovelBrowseClient.tsx  # Browse page with filters
-│   │   │   ├── ChaptersList.tsx # Expandable chapter list
-│   │   │   ├── RatingWidget.tsx # Interactive star rating
-│   │   │   ├── SearchClient.tsx # Search UI
-│   │   │   ├── LibraryClient.tsx    # Library tabs + streak
-│   │   │   └── ProfileClient.tsx    # Profile page
-│   │   ├── reader/
-│   │   │   ├── ReaderClient.tsx     # Full immersive reader
-│   │   │   ├── TableOfContents.tsx  # Side TOC panel
-│   │   │   └── ReaderComments.tsx   # Chapter comments
-│   │   └── ui/
-│   │       └── Skeleton.tsx     # Loading skeleton components
-│   │
-│   ├── hooks/
-│   │   └── useReadingProgress.ts  # Scroll progress hook
-│   ├── stores/
-│   │   └── readerStore.ts       # Zustand: reader prefs + session
-│   ├── lib/
-│   │   ├── mock-data.ts         # All novel/chapter/comment data
-│   │   └── utils.ts             # cn(), formatNumber(), formatDate()
-│   ├── styles/
-│   │   └── globals.css          # CSS variables, design system
-│   ├── tailwind.config.ts
-│   ├── tsconfig.json
-│   ├── next.config.ts
-│   ├── postcss.config.js
-│   └── package.json
-│
-├── backend/                     # FastAPI Python (scaffold)
-│   ├── main.py
-│   └── app/
-│       ├── core/config.py
-│       └── routers/novels.py
-│
-├── database/
-│   ├── schema.sql               # Full PostgreSQL schema
-│   └── prisma.schema            # Prisma ORM schema
-│
-├── .env.example
-└── README.md
-```
-
----
-
-## Running on Replit
-
-1. Go to **replit.com** → **Create Repl** → **Import from GitHub** (paste your repo URL)  
-   *or* click **Upload** and drag the project ZIP
-
-2. Replit auto-detects Node.js. If not, set the run command manually:
-
-```
-cd frontend && npm install && npm run dev -- --port 3000 --hostname 0.0.0.0
-```
-
-3. In **Secrets** (the lock icon), add:
-```
-NEXT_PUBLIC_APP_URL = https://your-repl-url.replit.dev
-```
-
-4. Click **Run** — Replit opens the app in the preview pane.
-
-> **Important:** Change `npm run dev` to `npm run build && npm start` for production mode on Replit.
-
----
-
-## Running on GitHub Codespaces
-
-1. Push to GitHub, then click **Code → Codespaces → Create codespace**
-
-2. In the terminal:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-3. Codespaces auto-forwards port 3000 — click **Open in Browser** in the Ports tab.
-
-4. To keep it persistent, add a `.devcontainer/devcontainer.json`:
-```json
-{
-  "postCreateCommand": "cd frontend && npm install",
-  "forwardPorts": [3000]
-}
-```
-
----
-
-## Running the Backend (Optional)
-
-The frontend currently uses mock data and works standalone. To connect the real FastAPI backend:
-
-### Prerequisites
-- Python 3.11+
-- PostgreSQL 14+
-
-### Setup
-```bash
-# Create virtual environment
-cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up database
-createdb luminary
-psql luminary < ../database/schema.sql
-
-# Copy and fill env vars
-cp ../.env.example .env
-# Edit .env with your DATABASE_URL, SUPABASE keys, etc.
-
-# Run
-uvicorn main:app --reload --port 8000
-```
-
-API docs available at **http://localhost:8000/api/docs**
-
----
-
-## Building for Production
-
-```bash
-cd frontend
-npm run build
-npm start
-```
-
-Or deploy to **Vercel** (recommended):
-
-```bash
-npm i -g vercel
-cd frontend
-vercel
-```
+- Admin dashboard
+- Novel management
+- Chapter management
+- Draft and published chapter support
+- Origin language selection
+- Admin guide popup
 
 ---
 
 ## Tech Stack
 
-**Frontend**
-- Next.js 15 (App Router, React 19)
-- TypeScript
-- Tailwind CSS 3
-- Zustand (state)
-- Lucide React (icons)
-- `use-debounce` (search)
-- Google Fonts (Cormorant Garamond, DM Sans, Lora)
+### Frontend
 
-**Backend** *(scaffold — not required for local dev)*
-- FastAPI (Python)
-- PostgreSQL + Prisma ORM
-- Supabase (Auth + Storage)
+- Next.js 15
+- React
+- TypeScript
+- Tailwind CSS
+- Zustand
+
+### Backend & Database
+
+- Supabase
+  - PostgreSQL Database
+  - Storage
+
+- FastAPI (backend scaffold)
 
 ---
 
-## Design System
+## Getting Started
 
-- **Dark mode by default** — switches via `ThemeProvider`
-- **CSS variables** for all colors — see `styles/globals.css`
-- **Reader themes**: Light, Sepia, Dark, Forest, Ocean
-- **Typography**: Display (Cormorant), UI (DM Sans), Reading (Lora)
-- **Animations**: fade-up, scale-in, shimmer via Tailwind keyframes
+### Requirements
+
+| Tool | Version |
+|--------|---------|
+| Node.js | 18+ |
+| npm | 9+ |
+
+Check your versions:
+
+```bash
+node -v
+npm -v
+```
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/YuQing15/silent-star.git
+cd silent-star
+```
+
+Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+Run locally:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Environment Variables
+
+Create a file called:
+
+```text
+frontend/.env.local
+```
+
+Example:
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_ADMIN_PREVIEW_PASSWORD=your_password
+```
+
+---
+
+## Project Structure
+
+```text
+silent-star/
+├── frontend/
+├── backend/
+├── database/
+└── README.md
+```
+
+### Frontend
+
+```text
+frontend/
+├── app/
+├── components/
+├── hooks/
+├── lib/
+├── stores/
+├── styles/
+└── supabase/
+```
+
+### Backend
+
+```text
+backend/
+└── FastAPI scaffold
+```
+
+### Database
+
+```text
+database/
+└── PostgreSQL / Supabase schema
+```
+
+---
+
+## Main Pages
+
+| Route | Description |
+|---------|-------------|
+| `/` | Home page |
+| `/browse` | Browse all novels |
+| `/novels/[id]` | Novel details |
+| `/novels/[id]/chapters/[chapterId]` | Chapter reader |
+| `/profile` | Reader dashboard |
+| `/admin` | Admin desk |
+
+---
+
+## Reader Features
+
+### Reading Layouts
+
+- Mobile / Narrow
+- Desktop / Wide
+- Adjustable content width
+
+### Fonts
+
+- Serif
+- Sans
+- Literata
+
+### Themes
+
+- Light
+- Sepia
+- Dark
+- Snow
+- Starry
+
+### Progress Tracking
+
+- Automatic progress saving
+- Continue Reading support
+- Chapter completion tracking
+- Bookmark support
+
+---
+
+## Deployment
+
+Silent Star is configured for deployment on Vercel.
+
+### Build
+
+```bash
+cd frontend
+npm run build
+```
+
+### Vercel Settings
+
+```text
+Framework Preset: Next.js
+Root Directory: frontend
+```
+
+Push changes to GitHub and connect the repository to Vercel.
+
+---
+
+## Planned Improvements
+
+- Add more novels and chapters
+- Improve novel discovery and filtering
+- Expand reader customisation options
+- Improve admin publishing workflow
+- Add optional translation assistance tools
+
+---
+
+## About
+
+Silent Star is a personal project built around my interest in translated web novels.
+
+The goal was to create a reading experience that feels cleaner and more comfortable than many existing aggregator sites, while providing useful reader features such as progress tracking, custom themes, adjustable layouts, and chapter management tools.
+
+The project is currently used as a platform for hosting and reading translated Chinese and Korean fiction.
