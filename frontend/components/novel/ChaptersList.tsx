@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import type { Chapter } from '@/lib/mock-data'
@@ -12,12 +12,20 @@ interface ChaptersListProps {
   chapters?: Chapter[]
 }
 
+const INITIAL_CHAPTER_COUNT = 15
+const CHAPTER_BATCH_SIZE = 35
+
 export function ChaptersList({ novelSlug, totalChapters, chapters: providedChapters }: ChaptersListProps) {
-  const [expanded, setExpanded] = useState(false)
-  const PAGE_SIZE = 15
   const chapters = providedChapters ?? []
-  const shown = expanded ? Math.min(50, chapters.length || totalChapters) : PAGE_SIZE
+  const [visibleCount, setVisibleCount] = useState(INITIAL_CHAPTER_COUNT)
+  const shown = Math.min(visibleCount, chapters.length || totalChapters)
   const visibleChapters = chapters.length > 0 ? chapters.slice(0, shown) : []
+  const hasMoreChapters = chapters.length > visibleChapters.length
+  const canCollapse = visibleChapters.length > INITIAL_CHAPTER_COUNT
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_CHAPTER_COUNT)
+  }, [novelSlug, chapters.length])
 
   if (chapters.length === 0) {
     return (
@@ -30,7 +38,7 @@ export function ChaptersList({ novelSlug, totalChapters, chapters: providedChapt
   return (
     <div className="rounded-2xl overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
       {visibleChapters.map((ch, i) => {
-        const isLast = i === visibleChapters.length - 1 && !(chapters.length > PAGE_SIZE && !expanded)
+        const isLast = i === visibleChapters.length - 1 && !hasMoreChapters
         return (
           <Link
             key={ch.id}
@@ -56,11 +64,29 @@ export function ChaptersList({ novelSlug, totalChapters, chapters: providedChapt
         )
       })}
 
-      {chapters.length > PAGE_SIZE && (
-        <button onClick={() => setExpanded(e => !e)} className="w-full py-3.5 flex items-center justify-center gap-2 text-sm font-medium transition-colors hover:bg-[var(--bg-muted)]" style={{ color: 'var(--text-secondary)' }}>
-          {expanded ? <><ChevronUp size={14} />Show fewer chapters</> : <><ChevronDown size={14} />Show {chapters.length - PAGE_SIZE} more chapters</>}
-        </button>
+      {(hasMoreChapters || canCollapse) && (
+        <div className="flex flex-col sm:flex-row">
+          {hasMoreChapters && (
+            <button
+              onClick={() => setVisibleCount(count => Math.min(count + CHAPTER_BATCH_SIZE, chapters.length))}
+              className="w-full flex-1 py-3.5 flex items-center justify-center gap-2 text-sm font-medium transition-colors hover:bg-[var(--bg-muted)]"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <ChevronDown size={14} />Show {Math.min(CHAPTER_BATCH_SIZE, chapters.length - visibleChapters.length)} more chapters
+            </button>
+          )}
+          {canCollapse && (
+            <button
+              onClick={() => setVisibleCount(INITIAL_CHAPTER_COUNT)}
+              className="w-full flex-1 py-3.5 flex items-center justify-center gap-2 text-sm font-medium transition-colors hover:bg-[var(--bg-muted)]"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <ChevronUp size={14} />Show fewer chapters
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
 }
+
